@@ -9,11 +9,11 @@ WORKDIR /app
 # 这里主要保证 CA 证书正常，便于拉取依赖
 RUN apk add --no-cache ca-certificates
 
-# 先复制 go.mod / go.sum，加快构建缓存
-COPY go.mod go.sum ./
+# 先仅复制 go.mod，加快依赖缓存（go.sum 可由 go mod download 自动生成）
+COPY go.mod ./
 RUN go mod download
 
-# 再复制剩余源码
+# 再复制剩余源码（包含 go.sum 和 main.go 等）
 COPY . .
 
 # 编译为静态 Linux amd64 二进制
@@ -40,4 +40,3 @@ EXPOSE 8080
 
 # 入口命令
 CMD ["/app/google-proxy"]
-
