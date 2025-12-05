@@ -23,7 +23,17 @@
 
 ## 编译与运行
 
-### 使用 Docker（推荐）
+### Docker Compose（推荐）
+
+使用提供的 `docker-compose.yml` 文件，直接启动服务：
+
+```bash
+docker-compose up -d
+```
+
+如果需要配置调整代理, 则直接修改 `docker-compose.yml` 中的环境变量 `SOCKS5_URL` 即可。
+
+### 使用 Docker
 
 在项目根目录构建镜像：
 
@@ -44,6 +54,7 @@ docker run --rm -p 8080:8080 \
   -e SOCKS5_URL="socks5://user:pass@1.2.3.4:1080" \
   google-proxy
 ```
+
 
 ### 本地运行（Go 环境）
 

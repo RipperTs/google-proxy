@@ -4,8 +4,8 @@ FROM golang:1.23-alpine AS builder
 
 WORKDIR /app
 
-# 预先拷贝依赖文件，加快构建缓存
-COPY go.mod go.sum ./
+# 预先拷贝 go.mod，加快依赖缓存（go.sum 如不存在也不影响构建）
+COPY go.mod ./
 RUN go mod download
 
 # 拷贝源码
@@ -32,4 +32,3 @@ EXPOSE 8080
 # 例如：SOCKS5_URL="socks5://user:pass@1.2.3.4:1080"
 
 ENTRYPOINT ["/app/google-proxy"]
-
