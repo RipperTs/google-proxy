@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  google-proxy:
+    image: registry.cn-hangzhou.aliyuncs.com/ripper/google-proxy:latest
+    container_name: google-proxy
+    restart: always
+
+    # 容器内服务监听 8080
+    ports:
+      - "8080:8080"
+
+    # 可选：配置上游 SOCKS5 代理，不需要时可以删掉或留空
+    # 例如：socks5://user:pass@1.2.3.4:1080
+    environment:
+      # - SOCKS5_URL=socks5://user:pass@1.2.3.4:1080
+      - TZ=Asia/Shanghai
+
+    # 将日志目录挂载到宿主机，便于持久化和查看
+    volumes:
+      - ./logs:/app/logs
+
+    # 可选：提升文件描述符上限，适合高并发场景
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+
