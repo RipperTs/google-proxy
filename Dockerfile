@@ -1,11 +1,11 @@
-# 多阶段构建：先在 golang 镜像中编译，再放入精简运行镜像
+# 多阶段构建：先在 golang 1.24 镜像中编译，再放入精简运行镜像
 
-FROM golang:1.23-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
-# 预先拷贝 go.mod，加快依赖缓存（go.sum 如不存在也不影响构建）
-COPY go.mod ./
+# 预先拷贝依赖文件，加快构建缓存
+COPY go.mod go.sum ./
 RUN go mod download
 
 # 拷贝源码
