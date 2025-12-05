@@ -1,4 +1,4 @@
-# google-proxy
+# 谷歌翻译代理
 
 一个针对 Google Translate 的高性能反向代理，支持可选 SOCKS5 上游代理、IP 级限流、按天分割访问日志。
 
