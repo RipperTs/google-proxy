@@ -1,34 +1,43 @@
-# 多阶段构建：先在 golang 1.24 镜像中编译，再放入精简运行镜像
+## 多阶段构建，生成体积较小的运行镜像
 
+# ---------- 构建阶段 ----------
 FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
-# 预先拷贝依赖文件，加快构建缓存
+# 可选：安装常用工具（如需要拉取私有仓库可以打开 git）
+# 这里主要保证 CA 证书正常，便于拉取依赖
+RUN apk add --no-cache ca-certificates
+
+# 先复制 go.mod / go.sum，加快构建缓存
 COPY go.mod go.sum ./
 RUN go mod download
 
-# 拷贝源码
+# 再复制剩余源码
 COPY . .
 
-# 构建静态二进制，目标平台为 linux/amd64
+# 编译为静态 Linux amd64 二进制
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o google-proxy .
 
-# 运行阶段
+
+# ---------- 运行阶段 ----------
 FROM alpine:3.20
 
 WORKDIR /app
 
-# 安装 CA 证书，用于访问 HTTPS（例如 translate.google.com）
-RUN apk add --no-cache ca-certificates
+# 安装 CA 证书和时区数据，保证 HTTPS 以及 TZ=Asia/Shanghai 正常
+RUN apk add --no-cache ca-certificates tzdata && \
+    mkdir -p /app/logs
+
+# 默认时区，可被环境变量覆盖
+ENV TZ=Asia/Shanghai
 
 # 拷贝编译好的二进制
 COPY --from=builder /app/google-proxy /app/google-proxy
 
-# 默认暴露 8080 端口
+# 服务监听端口
 EXPOSE 8080
 
-# 运行时可以通过环境变量 SOCKS5_URL 控制上游 SOCKS5 代理
-# 例如：SOCKS5_URL="socks5://user:pass@1.2.3.4:1080"
+# 入口命令
+CMD ["/app/google-proxy"]
 
-ENTRYPOINT ["/app/google-proxy"]
